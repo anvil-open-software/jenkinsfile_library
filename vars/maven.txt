@@ -1,0 +1,8 @@
+<h3>Usage: maven(String goals, String version, x11, skipTests)</h3>
+sets artifactory, docker and, if desired, the Xvfb X11 server, and executes the given goals with maven.
+
+If the version is publishable, any artifacts, including docker images, will be published.
+
+A typical pipeline calls this step multiple times for a given version, typically up to three times: for the main build,
+for the sonar build and for the release build. The buildInfoQualifier is used to distinguish between these builds and
+prevents from publishing artifacts from the sonar build.

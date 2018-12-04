@@ -1,0 +1,4 @@
+<h3>Usage: nextSnapshotVersionFor(String version)</h3>
+given a release version string, generate a snapshot version at the next patch-level
+
+nextSnapshotVersionFor("1.4.3") -> "1.4.4-SNAPSHOT"

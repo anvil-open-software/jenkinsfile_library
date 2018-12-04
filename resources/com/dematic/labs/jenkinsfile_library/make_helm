@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Copyright 2018 Dematic, Corp.
+# Licensed under the MIT Open Source License: https://opensource.org/licenses/MIT
+set -e
+
+repo_url='gs://us.artifacts.dlabs-dev-primary.appspot.com/charts/'
+
+if [[ $# > 1 && "$1" = "--dir" ]]; then
+    projectDir=`cd "$2" && pwd`
+    shift 2;
+else
+    projectDir=`cd $(dirname "$0") && pwd`;
+fi
+
+chartsDir="$projectDir/src/helm/charts"
+[[ -e "$projectDir/pom.xml" ]] && chartsDir="$projectDir/src/main/helm/charts"
+targetDir="$projectDir/target/helm"
+repoDir="$targetDir/repo"
+
+function setWorkingDir() {
+	[[ -d "$chartsDir/$1" ]]  || { echo "$chartsDir/$1 doesn't exist"; exit 3; }
+	cd "$chartsDir/$1";
+	[[ -f Chart.yaml ]] || { echo "No Chart.yaml in $(pwd)"; exit 3; }
+}
+
+helm version -c --short
+case "$1" in
+	clean)
+		rm -fr "$repoDir"
+		;;
+	lint)
+		[[ $# > 1 ]] || { echo "Usage: lint [name]"; exit 2; }
+		setWorkingDir "$2"
+		helm lint --values ../lint_values.yaml
+		;;
+	package)
+		[[ $# > 2 ]] || { echo "Usage: package [name] [semver]"; exit 2; }
+		setWorkingDir "$2"
+
+		[[ -d "$repoDir" ]] || mkdir -p "$repoDir"
+		cd "$repoDir"
+		helm --debug dep build "$chartsDir/$2"
+		helm --debug package --save=false --version="$3" "$chartsDir/$2"
+		;;
+	publish)
+		gsutil cp ${repo_url}index.yaml "$repoDir" || echo "First access to $repo_url"
+		[[ -f index.yaml ]] && mergeIndex='--merge ./index.yaml'
+		helm repo index $mergeIndex "$repoDir"
+		gsutil -m rsync "$repoDir" $repo_url
+		;;
+	install)
+		[[ $# > 2 ]] || { echo "Usage: install [name] [semver] ([cluster name] [namespace])"; exit 2; }
+		if [[ $# > 4 ]]; then
+			cluster=$4
+			namespace=$5
+		else
+			[[ $GLOBAL_KUBERNETES_HELM_CLUSTER == ?*:?* ]] || { echo "environment GLOBAL_KUBERNETES_HELM_CLUSTER <zone>:<cluster name> required when <cluster name> not passed as an argument"; exit 2; }
+			cluster="${GLOBAL_KUBERNETES_HELM_CLUSTER#*:} --zone=${GLOBAL_KUBERNETES_HELM_CLUSTER%:*}"
+			[[ -n "$BRANCH_NAME" ]] || { echo "environment BRANCH_NAME required when <namespace> not passed as argument"; exit 2; }
+			namespace=`echo ${BRANCH_NAME%_*} | tr '[:upper:]' '[:lower:]'`
+		fi
+		if [[ $namespace == "master" ]]; then
+			release=$2
+		else
+			release="$namespace-$2"
+		fi
+
+		cluster_status=`gcloud --quiet container clusters describe $cluster --format='csv[no-heading](status)'` || { echo "cluster $cluster not reachable, skipping"; exit 0; }
+		[[ $cluster_status='RUNNING' ]] || { echo "cluster $cluster not running ($cluster_status), skipping"; exit 0; }
+
+		gcloud container clusters get-credentials $cluster
+		kubectl get namespaces $namespace || { echo "$namespace not defined in cluster $cluster, skipping"; exit 0; }
+		kubectl get configmap --namespace=$namespace -o jsonpath='{.data.config }' dlabs-helm > "$targetDir/values.yaml"
+# is this the right time to install/upgrade tiller? Leave commented out for now
+#       helm --debug init --upgrade --wait
+		helm --debug upgrade --values "$targetDir/values.yaml" --namespace $namespace --install $release "$repoDir/$2-$3.tgz"
+		;;
+	*)
+		[[ $# > 0 ]] && echo "Unknown command: $1"
+		echo "Usage: $(basename $0) [--dir=project_dir] (clean|lint|package|publish|install)"
+		exit 1
+		;;
+esac

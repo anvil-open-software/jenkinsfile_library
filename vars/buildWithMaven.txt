@@ -1,0 +1,23 @@
+<h3>Usage: buildWithMaven()</h3>
+performs a complete maven-based build of the project.
+
+An optional closure can be used to set project configuration.
+
+skipSonar: to bypass sonar
+skipTests: to bypass all tests
+X11: to launch an X11 server for headless ui testing
+
+Example:
+Standard build:
+buildWithMaven()
+
+Build that bypass sonar and all testings, don't do that:
+buildWithMaven() {
+   skipSonar = true
+   skipTests = true
+}
+
+Build that launches an X11 server for headless ui testing:
+buildWithMaven() {
+   X11 = true
+}

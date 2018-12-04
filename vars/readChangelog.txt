@@ -1,0 +1,2 @@
+<h3>Usage: readChangelog()</h3>
+parses a changelog and returns the version and the date of the most recent version.

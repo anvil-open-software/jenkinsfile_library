@@ -1,0 +1,2 @@
+<h3>Usage: isFeatureBranchVersion(String version)</h3>
+returns true if the version string denotes a feature branch version.

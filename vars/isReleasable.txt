@@ -1,0 +1,4 @@
+<h3>Usage: isReleasable(String version)</h3>
+true if build artifacts for the given version can be released.
+
+Please refer to <a href="https://wiki.dematic.com/display/PTSL/TN-027+Continuous+Delivery+at+DLabs">TN-027 Continuous Delivery at DLabs</a>.

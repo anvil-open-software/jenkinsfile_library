@@ -1,0 +1,4 @@
+<h3>Usage: notifyBuild(String buildStatus = 'SUCCESS')</h3>
+notify on hipchat and on mail of the build status.
+Notification is skipped if the buildStatus is 'Started'.
+Emails are sent only for failed builds of master.

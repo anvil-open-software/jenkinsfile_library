@@ -1,0 +1,2 @@
+<h3>Usage: isSnapshotVersion(String version)</h3>
+returns true if the version string denotes a snapshot version, false it if denotes a release version.

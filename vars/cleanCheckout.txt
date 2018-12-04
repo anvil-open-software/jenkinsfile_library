@@ -1,0 +1,4 @@
+<h3>Usage: cleanCheckout()</h3>
+
+this version of the checkout scm commands ensures that all checkouts undergoes a similar set of options:
++ clean before checkout

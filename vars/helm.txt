@@ -1,0 +1,11 @@
+<h3>Wrapper around helm</h3>
+Provide command to lint, package and install helm charts.
+
+Usage:
+lint [name]
+package [name] [semver]
+publish
+install [name] [semver] ([cluster name])
+    if the cluster name is given, expect the zone to be set in gcloud
+    otherwise, rely on $GLOBAL_KUBERNETES_HELM_CLUSTER for zone and cluster name
+    will install onto a namespace derived from $BRANCH_NAME

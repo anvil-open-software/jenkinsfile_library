@@ -1,0 +1,5 @@
+<h3>Usage: gitPush(String options = '')</h3>
+push the local repository to the remote.
+
+This command is needed to provide to the git push step the necessary certificate id.
+The certificate id is not provided by default when running on a slave.

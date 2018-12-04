@@ -1,0 +1,6 @@
+<h3>Usage: isFeatureBranch(String version)</h3>
+true if the branch name denotes a feature branch.
+
+The recommended way to test the Jenkinsfile behaviour both on and off feature branches is to temporarily force the method to return true or false as desired.
+
+Please refer to <a href="https://wiki.dematic.com/display/PTSL/TN-027+Continuous+Delivery+at+DLabs">TN-027 Continuous Delivery at DLabs</a>

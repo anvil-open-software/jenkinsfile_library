@@ -1,0 +1,4 @@
+<h3>Usage: toReleaseVersion(String version)</h3>
+converts a snapshot version to a release version.
+
+toReleaseVersion("1.4.3-SNAPSHOT") -> "1.4.3"
